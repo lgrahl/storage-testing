@@ -6,6 +6,10 @@
         <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
     </head>
     <body>
+        <input id="target" type="number" min="0" value="12288" step="1024"> MiB
+        <button type="button" onclick="Threema.usage()">Usage</button>
+        <button type="button" onclick="Threema.populate()">Populate</button>
+        <button type="button" onclick="Threema.remove()">Remove</button>
         <script src="storage.js"></script>
     </body>
 </html>

@@ -16,12 +16,14 @@ function getDatabase() {
     return db;
 }
 
-
-async function main() {
+async function getQuotaEstimate() {
     // Get quota estimate
-    let estimate = await navigator.storage.estimate();
+    const estimate = await navigator.storage.estimate();
     console.info(`Quota/Usage: ${Math.round(estimate.quota / 1048576, 2)}/${Math.round(estimate.usage / 1048576, 2)} MiB`);
+    return estimate;
+}
 
+async function requestPersistence() {
     // Ask for permission to store persistently
     if (await navigator.storage.persisted()) {
         console.info('Already persistent');
@@ -33,10 +35,13 @@ async function main() {
             console.info('Temporary');
         }
     }
+    return persisted;
+}
 
-    // Get quota estimate (after persisted)
-    estimate = await navigator.storage.estimate();
-    console.info(`Quota/Usage: ${Math.round(estimate.quota / 1048576, 2)}/${Math.round(estimate.usage / 1048576, 2)} MiB`);
+
+async function main() {
+    // Get quota estimate
+    await getQuotaEstimate();
 
     // TODO: Verify the data persists even if data is being deleted
 
@@ -49,14 +54,14 @@ async function getUsage(db) {
         .reduce((accumulator, length) => accumulator + length, 0);
 }
 
-async function populate() {
-    // Store 12 GiB of data
+async function populate(target) {
+    // Store data
     const db = getDatabase();
     const array = new Uint8Array(10485760); // 10 MiB
     let usage = await getUsage(db);
-    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
+    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(target / 1048576, 2)} MiB`);
     try {
-        while (usage < TARGET) {
+        while (usage < target) {
             randomFill(array);
             await db.rubbish.add({
                 length: array.byteLength,
@@ -64,31 +69,35 @@ async function populate() {
             });
             
             usage += array.byteLength;
-            console.debug(`Currently at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
+            console.debug(`Currently at ${Math.round(usage / 1048576, 2)}/${Math.round(target / 1048576, 2)} MiB`);
         }
     } catch (error) {
-        console.error(`Failed at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB:`, error);
+        console.error(`Failed at ${Math.round(usage / 1048576, 2)}/${Math.round(target / 1048576, 2)} MiB:`, error);
     }
 }
 
-async function remove() {
+async function remove(target) {
     let usage = await getUsage();
-    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
+    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(target / 1048576, 2)} MiB`);
 
     // Remove all data
     const db = getDatabase();
     await db.rubbish.clear();
 
     usage = await getUsage();
-    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
+    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(target / 1048576, 2)} MiB`);
+}
+
+function getTarget() {
+    // Parse and convert MiB to Bytes
+    return parseInt(document.querySelector('#target').value, 10) * 1048576;
 }
 
 window.Threema = {
-    TARGET: 12884901888, // 12 GiB
-    populate: () => populate().catch((error) => console.error(error)),
-    remove: () => remove().catch((error) => console.error(error)),
-    usage: () => getUsage()
-        .then((usage) => console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`))
+    populate: (target) => populate(target || getTarget()).catch((error) => console.error(error)),
+    remove: (target) => remove(target || getTarget()).catch((error) => console.error(error)),
+    usage: (target) => getUsage()
+        .then((usage) => console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round((target || getTarget()) / 1048576, 2)} MiB`))
         .catch((error) => console.error(error)),
 };
 main().catch((error) => console.error(error));
