@@ -1,0 +1,9 @@
+{
+  "description": "I want to store data!",
+  "display": "standalone",
+  "name": "Storage Testing",
+  "short_name": "Storage Testing",
+  "start_url": ".",
+  "background_color": "rgb(117,117,117)",
+  "theme_color": "rgb(117,117,117)"
+}
