@@ -1,7 +1,5 @@
 //import Dexie from 'dexie';
 
-const TARGET = 12884901888; // 12 GiB
-
 function randomFill(array) {
     for (let offset = array.byteOffset; offset < array.byteLength; offset += 65536) {
         const length = Math.min(array.byteLength - offset, 65536);
@@ -56,7 +54,7 @@ async function populate() {
     const db = getDatabase();
     const array = new Uint8Array(10485760); // 10 MiB
     let usage = await getUsage(db);
-    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(TARGET / 1048576, 2)} MiB`);
+    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
     try {
         while (usage < TARGET) {
             randomFill(array);
@@ -66,30 +64,31 @@ async function populate() {
             });
             
             usage += array.byteLength;
-            console.debug(`Currently at ${Math.round(usage / 1048576, 2)}/${Math.round(TARGET / 1048576, 2)} MiB`);
+            console.debug(`Currently at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
         }
     } catch (error) {
-        console.error(`Failed at ${Math.round(usage / 1048576, 2)}/${Math.round(TARGET / 1048576, 2)} MiB:`, error);
+        console.error(`Failed at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB:`, error);
     }
 }
 
 async function remove() {
     let usage = await getUsage();
-    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(TARGET / 1048576, 2)} MiB`);
+    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
 
     // Remove all data
     const db = getDatabase();
     await db.rubbish.clear();
 
     usage = await getUsage();
-    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(TARGET / 1048576, 2)} MiB`);
+    console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`);
 }
 
 window.Threema = {
+    TARGET: 12884901888, // 12 GiB
     populate: () => populate().catch((error) => console.error(error)),
     remove: () => remove().catch((error) => console.error(error)),
     usage: () => getUsage()
-        .then((usage) => console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(TARGET / 1048576, 2)} MiB`))
+        .then((usage) => console.debug(`Usage at ${Math.round(usage / 1048576, 2)}/${Math.round(window.Threema.TARGET / 1048576, 2)} MiB`))
         .catch((error) => console.error(error)),
 };
 main().catch((error) => console.error(error));
