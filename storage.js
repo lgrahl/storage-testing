@@ -23,23 +23,28 @@ async function getQuotaEstimate() {
     return estimate;
 }
 
-async function requestPersistence() {
-    // Ask for permission to store persistently
-    if (await navigator.storage.persisted()) {
-        console.info('Already persistent');
+async function isPersistent() {
+    const persisted = await navigator.storage.persisted();
+    document.querySelector('#persistent').style.color = persisted ? 'green' : 'red';
+    return persisted;
+}
+
+async function persist() {
+    const persisted = await navigator.storage.persist();
+    if (persisted) {
+        console.info('Persistent');
     } else {
-        const persisted = await navigator.storage.persist();
-        if (persisted) {
-            console.info('Persistent');
-        } else {
-            console.info('Temporary');
-        }
+        console.info('Temporary');
     }
+    document.querySelector('#persistent').style.color = persisted ? 'green' : 'red';
     return persisted;
 }
 
 
-async function main() {
+async function main(persist) {
+    // Set initial value of persist button
+    await isPersistent();
+
     // Get quota estimate
     await getQuotaEstimate();
 
@@ -94,6 +99,8 @@ function getTarget() {
 }
 
 window.Threema = {
+    isPersistent: () => isPersistent().catch((error) => console.error(error)),
+    persist: () => persist().catch((error) => console.error(error)),
     populate: (target) => populate(target || getTarget()).catch((error) => console.error(error)),
     remove: (target) => remove(target || getTarget()).catch((error) => console.error(error)),
     usage: (target) => getUsage()
