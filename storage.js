@@ -33,6 +33,8 @@ function hasNotification(permission) {
     }
     document.querySelector('#notification').style.color = color;
     console.info(`Notification permission: ${permission}`);
+    // Google logic: Obviously, if the notification permission has been granted, it can auto-grant persistent storage.
+    isPersistent();
     return permission;
 }
 
