@@ -44,13 +44,13 @@ class ResourceCache {
         
         // Update the cache for a subsequent request asynchronously
         event.waitUntil((async () => {
-            let response;
             try {
-                response = await fetch(event.request);
+                const response = await fetch(event.request);
+                await ResourceCache.update(event.request, response);
             } catch (error) {
                 console.error('Could not update resource from network', error);
+                return;
             }
-            await ResourceCache.update(event.request, response);
         })());
         return response;
     }
