@@ -16,6 +16,31 @@ function getDatabase() {
     return db;
 }
 
+function hasNotification(permission) {
+    permission = permission || Notification.permission;
+    let color;
+    switch (permission) {
+        case 'granted':
+            color = 'green';
+            break;
+        case 'default':
+            color = 'orange';
+            break;
+        case 'denied':
+        default:
+            color = 'red';
+            break;
+    }
+    document.querySelector('#notification').style.color = color;
+    console.info(`Notification permission: ${permission}`);
+    return permission;
+}
+
+async function notification() {
+    const permission = await Notification.requestPermission();
+    return hasNotification(permission);
+}
+
 async function getQuotaEstimate() {
     // Get quota estimate
     const estimate = await navigator.storage.estimate();
@@ -52,7 +77,14 @@ async function main(persist) {
         console.info(`Service Worker registered for scope ${registration.scope}`);
     }
 
-    // Set initial value of persist button
+    // Determine initial value of notification button
+    try {
+        hasNotification();
+    } catch {
+        console.warn('Could not query whether notification permission has been granted');
+    }
+
+    // Determine initial value of persist button
     try {
         await isPersistent();
     } catch {
@@ -117,6 +149,8 @@ function getTarget() {
 }
 
 window.Threema = {
+    hasNotification: hasNotification,
+    notification: () => notification().catch((error) => console.error(error)),
     isPersistent: () => isPersistent().catch((error) => console.error(error)),
     persist: () => persist().catch((error) => console.error(error)),
     populate: (target) => populate(target || getTarget()).catch((error) => console.error(error)),
