@@ -1,6 +1,7 @@
 {
     "name": "Storage Testing",
     "start_url": ".",
+    "scope": ".",
     "display": "standalone",
     "icons": [
         {
@@ -14,5 +15,9 @@
         {
             "src": "icon.svg"
         }
-    ]
+    ],
+    "serviceworker": {
+        "src": "./serviceworker.js",
+        "update_via_cache": "none"
+    }
 }

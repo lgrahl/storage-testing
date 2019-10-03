@@ -42,6 +42,16 @@ async function persist() {
 
 
 async function main(persist) {
+    // Install service worker
+    if (navigator.serviceWorker.controller) {
+        console.info('Service Worker already registered');
+    } else {
+        const registration = await navigator.serviceWorker.register('serviceworker.js', {
+            scope: './'
+        });
+        console.info(`Service Worker registered for scope ${registration.scope}`);
+    }
+
     // Set initial value of persist button
     await isPersistent();
 
