@@ -53,10 +53,18 @@ async function main(persist) {
     }
 
     // Set initial value of persist button
-    await isPersistent();
+    try {
+        await isPersistent();
+    } catch {
+        console.warn('Could not query whether storage is persistent');
+    }
 
     // Get quota estimate
-    await getQuotaEstimate();
+    try {
+        await getQuotaEstimate();
+    } catch {
+        console.warn('Could not query storage quota');
+    }
 
     // TODO: Verify the data persists even if data is being deleted
 
