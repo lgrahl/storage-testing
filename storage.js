@@ -38,9 +38,10 @@ function hasNotification(permission) {
 
 async function notification() {
     const permission = await Notification.requestPermission();
-    // Google logic: Obviously, if the notification permission has been granted, it can auto-grant persistent storage.
+    // Google logic: Obviously, if the notification permission has been granted,
+    // it will auto-grant persistent storage when requested...
     try {
-        isPersistent();
+        await persist();
     } catch {}
     return hasNotification(permission);
 }
@@ -52,8 +53,8 @@ async function getQuotaEstimate() {
     return estimate;
 }
 
-async function isPersistent() {
-    const persisted = await navigator.storage.persisted();
+async function isPersistent(persisted) {
+    persisted = persisted !== undefined ? persisted : await navigator.storage.persisted();
     document.querySelector('#persistent').style.color = persisted ? 'green' : 'red';
     console.info(`Storage: ${persisted ? 'persistent' : 'temporary'}`);
     return persisted;
@@ -61,8 +62,7 @@ async function isPersistent() {
 
 async function persist() {
     const persisted = await navigator.storage.persist();
-    document.querySelector('#persistent').style.color = persisted ? 'green' : 'red';
-    console.info(`Storage: ${persisted ? 'persistent' : 'temporary'}`);
+    await isPersistent(persisted);
     return persisted;
 }
 
