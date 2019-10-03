@@ -51,17 +51,14 @@ async function getQuotaEstimate() {
 async function isPersistent() {
     const persisted = await navigator.storage.persisted();
     document.querySelector('#persistent').style.color = persisted ? 'green' : 'red';
+    console.info(`Storage: ${persisted ? 'persistent' : 'temporary'}`);
     return persisted;
 }
 
 async function persist() {
     const persisted = await navigator.storage.persist();
-    if (persisted) {
-        console.info('Persistent');
-    } else {
-        console.info('Temporary');
-    }
     document.querySelector('#persistent').style.color = persisted ? 'green' : 'red';
+    console.info(`Storage: ${persisted ? 'persistent' : 'temporary'}`);
     return persisted;
 }
 
